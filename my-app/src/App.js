@@ -20,35 +20,27 @@ function App() {
       setMessages([...messages, { text: inputText, type: 'user' }]);
 
       try {
-                // 서버에 요청 보내기
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        // 서버에 요청 보내기
+        const response = await fetch('http://localhost:11434/api/generate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ',
           },
           body: JSON.stringify({
-            model: 'gpt-4',
-            messages: [{ role: 'user', content: inputText }],
+            model: 'phi3.5',
+            prompt: inputText,
           }),
         });
 
         if (response.ok) {
-          const data = await response.json();
-          const botMessage = data.choices[0].message.content;
+          const text = await response.text();
 
-          // 봇의 응답 메시지를 추가
-          setMessages(prevMessages => [
-            ...prevMessages, 
-            { text: botMessage, type: 'bot' }
-          ]);
-        } else {
-          console.error('Error:', response.status, response.statusText);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      }
+          // 개별 JSON 객체로 분할
+          const jsonObjects = text.trim().split("\n");
 
+          // 각 JSON 객체를 JavaScript 객체로 변환
+          const parsedData = jsonObjects.map(obj => JSON.parse(obj));
+          let resText = '';
 
           // 변환된 데이터 출력
           parsedData.forEach(item => {
@@ -139,7 +131,7 @@ function App() {
       <div style={styles.inputContainer}>
         <input
           type="text"
-          placeholder="Enter your message..."
+          placeholder="Enter your message... please"
           value={inputText}
           onChange={handleChange}
           onKeyDown={handleKeyDown} // 엔터 키 핸들러 추가
