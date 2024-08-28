@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function App() {
   // 상태 관리
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState([]);
 
+  // 마지막 메시지의 참조 생성
+  const lastMessageRef = useRef(null);
+  
   // 입력 필드 변경 핸들러
   const handleChange = (e) => {
     setInputText(e.target.value);
@@ -44,11 +47,36 @@ function App() {
             resText += item.response;
           });
 
-          // 서버의 응답 메시지를 추가
+          let index = 0;
           setMessages((prevMessages) => [
             ...prevMessages,
-            { text: resText, type: 'bot' }, // data.response 부분을 서버 응답 형식에 맞게 변경해야 함
+            { text: '', type: 'bot' }, // 빈 bot 메시지를 추가
           ]);
+
+          const typingInterval = setInterval(() => {
+            // resText를 공백 기준으로 단어로 분할
+            const words = resText.split(' ');
+          
+            if (index < words.length) {
+              setMessages((prevMessages) => {
+                // 메시지 배열을 복사한 후 마지막 bot 메시지를 업데이트
+                const updatedMessages = [...prevMessages];
+                const botMessage = { ...updatedMessages[updatedMessages.length - 1] };
+          
+                // undefined 방지: 단어가 존재하는 경우에만 추가
+                if (words[index] !== undefined && words[index] !== null) {
+                  botMessage.text += (index === 0 ? '' : ' ') + words[index];
+                }
+                
+                updatedMessages[updatedMessages.length - 1] = botMessage;
+          
+                return updatedMessages;
+              });
+              index++;
+            } else {
+              clearInterval(typingInterval); // 애니메이션 완료 시 인터벌 제거
+            }
+          }, 200); // 각 단어마다 500ms 간격으로 출력
         } else {
           console.error('Error:', response.status, response.statusText);
         }
@@ -68,6 +96,13 @@ function App() {
     }
   };
 
+   // 메시지가 추가될 때마다 마지막 메시지로 스크롤
+   useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]); // messages 상태가 변경될 때마다 실행
+
   return (
     <div style={styles.container}>
       {/* 상단 상태바 */}
@@ -75,7 +110,7 @@ function App() {
 
       {/* 채팅 내용 */}
       <div style={styles.chatContainer}>
-        <h1 style={styles.title}>ChatGPT Style Conversation</h1>
+        <h1 style={styles.title}>phi3.5 Conversation</h1>
 
         <div style={styles.chatBox}>
           {messages.map((message, index) => (
@@ -88,6 +123,7 @@ function App() {
               {message.text}
             </div>
           ))}
+          <div ref={lastMessageRef} />
         </div>
       </div>
 
