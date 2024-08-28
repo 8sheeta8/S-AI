@@ -1,48 +1,58 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 
 function App() {
-  // 상태 관리
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState([]);
-
-  // 마지막 메시지의 참조 생성
+  const [loading, setLoading] = useState(false);
   const lastMessageRef = useRef(null);
 
-  // 입력 필드 변경 핸들러
   const handleChange = (e) => {
     setInputText(e.target.value);
   };
 
-  // 결과 버튼 클릭 시 메시지 추가
-  const handleResultClick = () => {
+  const handleResultClick = async () => {
     if (inputText.trim() !== '') {
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: inputText, type: 'user' },
-        { text: 'success', type: 'bot' }
-      ]); // 사용자 메시지와 ChatGPT 응답을 함께 추가
-      setInputText(''); // 입력 필드 초기화
+        { text: inputText, type: 'user' }
+      ]);
+      setLoading(true);
+      setInputText('');
 
-      
+      try {
+        const response = await axios.post('http://localhost:11434/api/generate', {
+          prompt: inputText,
+          model: 'phi3'
+        });
+
+        const botResponse = response.data.text || "I'm here to help you with any relationship advice.";
+        setMessages((prevMessages) => [...prevMessages, { text: botResponse, type: 'bot' }]);
+      } catch (error) {
+        console.error("Error fetching response from Ollama API:", error);
+        setMessages((prevMessages) => [...prevMessages, { text: "Sorry, I couldn't process your request. Please try again.", type: 'bot' }]);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  // 엔터 키 핸들러 추가 
-  const handleKeyDown = (e) => { if (e.key === 'Enter') { handleResultClick(); } };
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleResultClick();
+    }
+  };
 
-  // 메시지가 추가될 때마다 마지막 메시지로 스크롤
   useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]); // messages 상태가 변경될 때마다 실행
+  }, [messages]);
 
   return (
     <div style={styles.container}>
-      {/* 상단 상태바 */}
       <div style={styles.statusBar}>상단 상태바</div>
 
-      {/* 채팅 내용 */}
       <div style={styles.chatContainer}>
         <h1 style={styles.title}>ChatGPT Style Conversation</h1>
 
@@ -50,40 +60,35 @@ function App() {
           {messages.map((message, index) => (
             <div
               key={index}
-              style={
-                message.type === 'user' ? styles.messageUser : styles.messageBot
-              }
+              style={message.type === 'user' ? styles.messageUser : styles.messageBot}
             >
               {message.text}
             </div>
           ))}
-          {/* 마지막 메시지에 대한 참조 */}
           <div ref={lastMessageRef} />
         </div>
       </div>
 
-      {/* 입력 필드와 결과 버튼이 아래에 위치 */}
       <div style={styles.inputContainer}>
         <input
           type="text"
           placeholder="Enter your message..."
           value={inputText}
           onChange={handleChange}
-          onKeyDown={handleKeyDown} // 엔터 키 핸들러 추가
+          onKeyDown={handleKeyDown}
           style={styles.input}
+          disabled={loading}
         />
-        <button onClick={handleResultClick} style={styles.button}>
-          결과
+        <button onClick={handleResultClick} style={styles.button} disabled={loading}>
+          {loading ? 'Loading...' : '결과'}
         </button>
       </div>
 
-      {/* 하단 상태바 */}
       <div style={styles.statusBar}>하단 상태바</div>
     </div>
   );
 }
 
-// 스타일 객체
 const styles = {
   container: {
     display: 'flex',
