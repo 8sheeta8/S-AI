@@ -76,7 +76,7 @@ function App() {
             } else {
               clearInterval(typingInterval); // 애니메이션 완료 시 인터벌 제거
             }
-          }, 200); // 각 단어마다 500ms 간격으로 출력
+          }, 200); // 각 단어마다 200ms 간격으로 출력
         } else {
           console.error('Error:', response.status, response.statusText);
         }
