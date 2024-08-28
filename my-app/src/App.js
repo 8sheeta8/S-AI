@@ -110,7 +110,7 @@ function App() {
 
       {/* 채팅 내용 */}
       <div style={styles.chatContainer}>
-        <h1 style={styles.title}>phi3.5 Conversation</h1>
+        <h1 style={styles.title}>ChatGPT Conversation</h1>
 
         <div style={styles.chatBox}>
           {messages.map((message, index) => (
@@ -190,7 +190,7 @@ const styles = {
   messageUser: {
     alignSelf: 'flex-end',
     padding: '10px 15px',
-    backgroundColor: '#007bff',
+    backgroundColor: '#5fa5df',
     color: 'white',
     borderRadius: '20px',
     maxWidth: '60%',
@@ -218,7 +218,7 @@ const styles = {
   input: {
     padding: '10px',
     fontSize: '16px',
-    width: '70%',
+    width: '510px',
     marginRight: '10px',
     border: '1px solid #ccc',
     borderRadius: '5px',
@@ -227,7 +227,7 @@ const styles = {
     padding: '10px 20px',
     fontSize: '16px',
     cursor: 'pointer',
-    backgroundColor: '#007bff',
+    backgroundColor: '#5fa5df',
     color: '#fff',
     border: 'none',
     borderRadius: '5px',
