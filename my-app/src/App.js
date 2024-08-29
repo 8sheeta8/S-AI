@@ -156,11 +156,11 @@ function App() {
           ))}
           <div ref={lastMessageRef} />
         </div>
-      </div>
+      </div>  
       <div style={styles.inputContainer}>
         <input
           type="text"
-          placeholder={isTyping ? "GPT is typing..." : "Enter your message..."}
+          placeholder={isTyping ? "고민중...💭" : "입력해...💌"}
           value={inputText}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -190,7 +190,7 @@ const styles = {
   statusBar: {
     width: '100%',
     height: '50px',
-    backgroundColor: '#282c34',
+    backgroundColor: '#da9df2',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
