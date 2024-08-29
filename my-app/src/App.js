@@ -38,44 +38,14 @@ function App() {
 
         if (response.ok) {
           const data = await response.json();
-          const text = data.choices[0].message.content;
+          const botMessage = data.choices[0].message.content;
 
-          // 봇의 응답 메시지를 추가
+          // 봇의 응답 메시지를 추가 (단일 메시지 추가)
           setMessages((prevMessages) => [
             ...prevMessages, 
-            { text: text, type: 'bot' }
+            { text: botMessage, type: 'bot' }
           ]);
-
-          let index = 0;
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            { text: '', type: 'bot' }, // 빈 bot 메시지를 추가
-          ]);
-
-          const typingInterval = setInterval(() => {
-            // resText를 공백 기준으로 단어로 분할
-            const words = text.split(' ');
           
-            if (index < words.length) {
-              setMessages((prevMessages) => {
-                // 메시지 배열을 복사한 후 마지막 bot 메시지를 업데이트
-                const updatedMessages = [...prevMessages];
-                const botMessage = { ...updatedMessages[updatedMessages.length - 1] };
-          
-                // undefined 방지: 단어가 존재하는 경우에만 추가
-                if (words[index] !== undefined && words[index] !== null) {
-                  botMessage.text += (index === 0 ? '' : ' ') + words[index];
-                }
-                
-                updatedMessages[updatedMessages.length - 1] = botMessage;
-          
-                return updatedMessages;
-              });
-              index++;
-            } else {
-              clearInterval(typingInterval); // 애니메이션 완료 시 인터벌 제거
-            }
-          }, 200); // 각 단어마다 200ms 간격으로 출력
         } else {
           console.error('Error:', response.status, response.statusText);
         }
