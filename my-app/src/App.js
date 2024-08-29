@@ -1,4 +1,3 @@
-// gpt
 import React, { useState, useRef, useEffect } from 'react';
 
 function App() {
@@ -14,12 +13,14 @@ function App() {
     setInputText(e.target.value);
   };
 
-
   // 결과 버튼 클릭 시 메시지 추가 및 서버에 요청 보내기
   const handleResultClick = async () => {
     if (inputText.trim() !== '') {
       // 사용자 메시지 추가
       setMessages([...messages, { text: inputText, type: 'user' }]);
+
+      // 입력 필드 초기화 - 메시지 전송 후 입력 필드를 바로 비웁니다.
+      setInputText('');
 
       try {
         // 서버에 요청 보내기
@@ -27,7 +28,7 @@ function App() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ', // API Key 입력
+            'Authorization': 'Bearer YOUR_API_KEY', // API Key 입력
           },
           body: JSON.stringify({
             model: 'gpt-4',
@@ -45,14 +46,6 @@ function App() {
             { text: botMessage, type: 'bot' }
           ]);
 
-          // 변환된 데이터 출력
-          let resText = '';
-          const parsedData = botMessage.split(' ');
-          parsedData.forEach(item => {
-            resText += item;
-          });
-
-          
           let index = 0;
           setMessages((prevMessages) => [
             ...prevMessages,
@@ -61,7 +54,7 @@ function App() {
 
           const typingInterval = setInterval(() => {
             // resText를 공백 기준으로 단어로 분할
-            const words = resText.split(' ');
+            const words = botMessage.split(' ');
           
             if (index < words.length) {
               setMessages((prevMessages) => {
@@ -89,9 +82,6 @@ function App() {
       } catch (error) {
         console.error('Error:', error);
       }
-
-      // 입력 필드 초기화
-      setInputText('');
     }
   };
 
@@ -102,8 +92,8 @@ function App() {
     }
   };
 
-   // 메시지가 추가될 때마다 마지막 메시지로 스크롤
-   useEffect(() => {
+  // 메시지가 추가될 때마다 마지막 메시지로 스크롤
+  useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
