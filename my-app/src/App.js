@@ -28,7 +28,7 @@ function App() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer YOUR_API_KEY', // API Key 입력
+            'Authorization': 'Bearer ', // API Key 입력
           },
           body: JSON.stringify({
             model: 'gpt-4',
@@ -38,12 +38,12 @@ function App() {
 
         if (response.ok) {
           const data = await response.json();
-          const botMessage = data.choices[0].message.content;
+          const text = data.choices[0].message.content;
 
           // 봇의 응답 메시지를 추가
           setMessages((prevMessages) => [
             ...prevMessages, 
-            { text: botMessage, type: 'bot' }
+            { text: text, type: 'bot' }
           ]);
 
           let index = 0;
@@ -54,7 +54,7 @@ function App() {
 
           const typingInterval = setInterval(() => {
             // resText를 공백 기준으로 단어로 분할
-            const words = botMessage.split(' ');
+            const words = text.split(' ');
           
             if (index < words.length) {
               setMessages((prevMessages) => {
