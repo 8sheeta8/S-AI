@@ -48,8 +48,8 @@ function App() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ', // API Key 입력
-          },
+            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`, // .env 파일에서 API 키 가져오기
+        },
           body: JSON.stringify({
             model: 'gpt-4',
             messages: updatedMessages.map((msg) => ({
