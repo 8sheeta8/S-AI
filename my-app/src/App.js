@@ -48,7 +48,7 @@ function App() {
             'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`, // .env 파일에서 API 키 가져오기
           },
           body: JSON.stringify({
-            model: 'gpt-4',
+            model: 'gpt-4o',
             messages: [{ role: 'user', content: combinedPrompt }],
           }),
         });
