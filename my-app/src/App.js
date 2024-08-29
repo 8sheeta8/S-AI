@@ -1,10 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-
 function App() {
   // 상태 관리
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState([]);
-
   // 마지막 메시지의 참조 생성
   const lastMessageRef = useRef(null);
   
@@ -12,23 +10,20 @@ function App() {
   const handleChange = (e) => {
     setInputText(e.target.value);
   };
-
   // 결과 버튼 클릭 시 메시지 추가 및 서버에 요청 보내기
   const handleResultClick = async () => {
     if (inputText.trim() !== '') {
       // 사용자 메시지 추가
       setMessages([...messages, { text: inputText, type: 'user' }]);
-
       // 입력 필드 초기화 - 메시지 전송 후 입력 필드를 바로 비웁니다.
       setInputText('');
-
       try {
         // 서버에 요청 보내기
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ', // API Key 입력
+            'Authorization': 'Bearer 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', // API Key 입력
           },
           body: JSON.stringify({
             model: 'gpt-4',
@@ -38,14 +33,44 @@ function App() {
 
         if (response.ok) {
           const data = await response.json();
-          const botMessage = data.choices[0].message.content;
+          const text = data.choices[0].message.content;
 
-          // 봇의 응답 메시지를 추가 (단일 메시지 추가)
+          // 봇의 응답 메시지를 추가
           setMessages((prevMessages) => [
             ...prevMessages, 
-            { text: botMessage, type: 'bot' }
+            { text: text, type: 'bot' }
           ]);
+
+          let index = 0;
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { text: '', type: 'bot' }, // 빈 bot 메시지를 추가
+          ]);
+
+          const typingInterval = setInterval(() => {
+            // resText를 공백 기준으로 단어로 분할
+            const words = text.split(' ');
+
+            if (index < words.length) {
+              setMessages((prevMessages) => {
+                // 메시지 배열을 복사한 후 마지막 bot 메시지를 업데이트
+                const updatedMessages = [...prevMessages];
+                const botMessage = { ...updatedMessages[updatedMessages.length - 1] };
           
+                // undefined 방지: 단어가 존재하는 경우에만 추가
+                if (words[index] !== undefined && words[index] !== null) {
+                  botMessage.text += (index === 0 ? '' : ' ') + words[index];
+                }
+                
+                updatedMessages[updatedMessages.length - 1] = botMessage;
+          
+                return updatedMessages;
+              });
+              index++;
+            } else {
+              clearInterval(typingInterval); // 애니메이션 완료 시 인터벌 제거
+            }
+          }, 200); // 각 단어마다 200ms 간격으로 출력
         } else {
           console.error('Error:', response.status, response.statusText);
         }
@@ -54,30 +79,25 @@ function App() {
       }
     }
   };
-
   // 엔터 키 핸들러 추가
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleResultClick();
     }
   };
-
   // 메시지가 추가될 때마다 마지막 메시지로 스크롤
   useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]); // messages 상태가 변경될 때마다 실행
-
   return (
     <div style={styles.container}>
       {/* 상단 상태바 */}
       <div style={styles.statusBar}>상단 상태바</div>
-
       {/* 채팅 내용 */}
       <div style={styles.chatContainer}>
         <h1 style={styles.title}>ChatGPT Conversation</h1>
-
         <div style={styles.chatBox}>
           {messages.map((message, index) => (
             <div
@@ -92,7 +112,6 @@ function App() {
           <div ref={lastMessageRef} />
         </div>
       </div>
-
       {/* 입력 필드와 결과 버튼이 아래에 위치 */}
       <div style={styles.inputContainer}>
         <input
@@ -103,18 +122,15 @@ function App() {
           onKeyDown={handleKeyDown} // 엔터 키 핸들러 추가
           style={styles.input}
         />
-
         <button onClick={handleResultClick} style={styles.button}>
           결과
         </button>
       </div>
-
       {/* 하단 상태바 */}
       <div style={styles.statusBar}>하단 상태바</div>
     </div>
   );
 }
-
 // 스타일 객체
 const styles = {
   container: {
@@ -199,5 +215,4 @@ const styles = {
     borderRadius: '5px',
   },
 };
-
 export default App;
