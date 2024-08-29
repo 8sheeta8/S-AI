@@ -157,7 +157,6 @@ function App() {
           💔 
         </button>
       </div>
-      <div style={styles.statusBar}>하단 상태바</div>
     </div>
   );
 }
