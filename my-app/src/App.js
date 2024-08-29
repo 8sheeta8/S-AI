@@ -1,3 +1,4 @@
+// gpt
 import React, { useState, useRef, useEffect } from 'react';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
     setInputText(e.target.value);
   };
 
+
   // 결과 버튼 클릭 시 메시지 추가 및 서버에 요청 보내기
   const handleResultClick = async () => {
     if (inputText.trim() !== '') {
@@ -21,32 +23,36 @@ function App() {
 
       try {
         // 서버에 요청 보내기
-        const response = await fetch('http://localhost:11434/api/generate', {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer ', // API Key 입력
           },
           body: JSON.stringify({
-            model: 'phi3.5',
-            prompt: inputText,
+            model: 'gpt-4',
+            messages: [{ role: 'user', content: inputText }],
           }),
         });
 
         if (response.ok) {
-          const text = await response.text();
+          const data = await response.json();
+          const botMessage = data.choices[0].message.content;
 
-          // 개별 JSON 객체로 분할
-          const jsonObjects = text.trim().split("\n");
-
-          // 각 JSON 객체를 JavaScript 객체로 변환
-          const parsedData = jsonObjects.map(obj => JSON.parse(obj));
-          let resText = '';
+          // 봇의 응답 메시지를 추가
+          setMessages((prevMessages) => [
+            ...prevMessages, 
+            { text: botMessage, type: 'bot' }
+          ]);
 
           // 변환된 데이터 출력
+          let resText = '';
+          const parsedData = botMessage.split(' ');
           parsedData.forEach(item => {
-            resText += item.response;
+            resText += item;
           });
 
+          
           let index = 0;
           setMessages((prevMessages) => [
             ...prevMessages,
