@@ -48,7 +48,7 @@ function App() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ', // API Key 입력
+            'Authorization': 'Bearer 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', // API Key 입력
           },
           body: JSON.stringify({
             model: 'gpt-4',
