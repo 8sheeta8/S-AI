@@ -22,7 +22,7 @@ function App() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ', // API Key 입력
+            'Authorization': 'Bearer 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', // API Key 입력
           },
           body: JSON.stringify({
             model: 'gpt-4',
@@ -89,6 +89,15 @@ function App() {
       handleResultClick();
     }
   };
+
+    
+// 채팅 업데이트 시 자동으로 스크롤 최신 메시지로 이동 
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
 
   return (
     <div style={styles.container}>
