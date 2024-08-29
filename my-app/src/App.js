@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import BrowserFS from 'browserfs';
+
 
 function App() {
   const [inputText, setInputText] = useState('');
@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // 서버에 호스팅된 텍스트 파일의 URL을 여기에 넣습니다.
-    const fileUrl = '/prompt.txt';
+    const fileUrl = '/prompt(mix).txt';
 
     // fetch 함수를 사용하여 파일을 가져옵니다.
     fetch(fileUrl)
