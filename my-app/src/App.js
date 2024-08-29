@@ -12,10 +12,12 @@ function App() {
   };
 
   const handleResultClick = async () => {
-    if (inputText.trim() !== '' && !isTyping) { // GPT가 출력 중일 때는 실행하지 않음
-      setMessages([...messages, { text: inputText, type: 'user' }]);
+    if (inputText.trim() !== '' && !isTyping) {
+      const newMessage = { text: inputText, type: 'user' };
+      const updatedMessages = [...messages, newMessage]; // 이전 메시지들과 새 메시지를 결합
+      setMessages(updatedMessages);
       setInputText('');
-      setIsTyping(true); // GPT 출력 시작
+      setIsTyping(true);
 
       try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -26,10 +28,13 @@ function App() {
           },
           body: JSON.stringify({
             model: 'gpt-4',
-            messages: [{ role: 'user', content: inputText }],
+            messages: updatedMessages.map((msg) => ({
+              role: msg.type === 'user' ? 'user' : 'assistant', // 메시지의 타입에 따라 역할 지정
+              content: msg.text,
+            })),
           }),
         });
-
+        
         if (response.ok) {
           const data = await response.json();
           const text = data.choices[0].message.content;
