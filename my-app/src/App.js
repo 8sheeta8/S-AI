@@ -7,7 +7,7 @@ function App() {
   const [isTyping, setIsTyping] = useState(false); // GPT 출력 중 여부 관리
   const lastMessageRef = useRef(null);
   const [fileContent, setFileContent] = useState('');
-  
+
   const handleChange = (e) => {
     setInputText(e.target.value);
   };
@@ -21,41 +21,26 @@ function App() {
           throw new Error('파일을 가져오는 데 실패했습니다.');
         }
 
-        const reader = response.body
-          .pipeThrough(new TextDecoderStream())
-          .getReader();
-
-        let content = '';
-        const readChunk = () => {
-          reader.read().then(({ done, value }) => {
-            if (done) {
-              setFileContent(content); // 모든 데이터를 읽은 후 상태에 저장
-              return;
-            }
-
-            content += value; // 현재 청크를 content에 추가
-            readChunk(); // 다음 청크 읽기
-          }).catch((error) => {
-            console.error('파일을 읽는 도중 오류가 발생했습니다:', error);
-          });
-        };
-
-        readChunk(); // 첫 번째 청크 읽기 시작
+        return response.text(); // 텍스트 형태로 응답을 변환합니다.
+      })
+      .then((text) => {
+        setFileContent(text); // 파일 내용을 상태에 저장합니다.
       })
       .catch((error) => {
         console.error('파일을 읽는 도중 오류가 발생했습니다:', error);
       });
-  }, []); // 빈 배열을 넣어 컴포넌트가 처음 렌더링될 때만 실행되도록 합니다.
+  }, []);
 
   const handleResultClick = async () => {
     if (inputText.trim() !== '' && !isTyping) {
       const newMessage = { text: inputText, type: 'user' };
-      const updatedMessages = [...messages, newMessage]; // 이전 메시지들과 새 메시지를 결합
+      const updatedMessages = [...messages, newMessage];
       setMessages(updatedMessages);
       setInputText('');
       setIsTyping(true);
 
       try {
+        const combinedPrompt = `${fileContent}\n\n<<< 사용자 입력 >>>\n\n${inputText}\n\n<<< 답변 >>>\n`;
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -64,21 +49,20 @@ function App() {
           },
           body: JSON.stringify({
             model: 'gpt-4',
-            messages: updatedMessages.map((msg) => ({
-              role: msg.type === 'user' ? 'user' : 'assistant', // 메시지의 타입에 따라 역할 지정
-              content: msg.text + fileContent,
-            })),
+            messages: [{ role: 'user', content: combinedPrompt }],
           }),
         });
+
+        //console.log(combinedPrompt);
 
         if (response.ok) {
           const data = await response.json();
           const text = data.choices[0].message.content;
 
-          let index = -1; // 함수 내부로 들어가면 index=0 부터 시작
+          let index = -1;
           setMessages((prevMessages) => [
             ...prevMessages,
-            { text: '', type: 'bot' }, // 빈 bot 메시지를 추가
+            { text: '', type: 'bot' }, 
           ]);
 
           const typingInterval = setInterval(() => {
@@ -99,29 +83,29 @@ function App() {
               });
               index++;
             } else {
-              clearInterval(typingInterval); // 애니메이션 완료 시 인터벌 제거
-              setTypingIntervalId(null); // 인터벌 ID를 null로 초기화
-              setIsTyping(false); // GPT 출력 종료
+              clearInterval(typingInterval); 
+              setTypingIntervalId(null); 
+              setIsTyping(false); 
             }
-          }, 200); // 각 단어마다 200ms 간격으로 출력
+          }, 200);
 
-          setTypingIntervalId(typingInterval); // 인터벌 ID를 상태로 저장
+          setTypingIntervalId(typingInterval); 
         } else {
           console.error('Error:', response.status, response.statusText);
-          setIsTyping(false); // 에러 발생 시 GPT 출력 종료
+          setIsTyping(false); 
         }
       } catch (error) {
         console.error('Error:', error);
-        setIsTyping(false); // 에러 발생 시 GPT 출력 종료
+        setIsTyping(false); 
       }
     }
   };
 
   const handleStopClick = () => {
     if (typingIntervalId) {
-      clearInterval(typingIntervalId); // 인터벌 중지
-      setTypingIntervalId(null); // 인터벌 ID를 null로 초기화
-      setIsTyping(false); // GPT 출력 종료
+      clearInterval(typingIntervalId);
+      setTypingIntervalId(null);
+      setIsTyping(false);
     }
   };
 
@@ -131,7 +115,6 @@ function App() {
     }
   };
 
-  // 채팅 업데이트 시 자동으로 스크롤 최신 메시지로 이동 
   useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -165,7 +148,7 @@ function App() {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           style={styles.input}
-          disabled={isTyping} // GPT가 출력 중일 때는 입력창 비활성화
+          disabled={isTyping} 
         />
         <button onClick={handleResultClick} style={styles.button} disabled={isTyping}>
           ❤️
@@ -204,10 +187,10 @@ const styles = {
     flex: 1,
     width: '100%',
     overflowY: 'auto',
-    backgroundImage: "url('/pink.png')", // 배경 이미지 URL
-    backgroundSize: 'cover', // 배경 이미지가 전체를 덮도록
-    backgroundPosition: 'center', // 배경 이미지의 위치를 중앙으로
-    backgroundRepeat: 'no-repeat' // 배경 이미지가 반복되지 않도록
+    backgroundImage: "url('/pink.png')",
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
   },
   title: {
     marginBottom: '20px',
@@ -264,7 +247,7 @@ const styles = {
     color: '#fff',
     border: 'none',
     borderRadius: '5px',
-    marginLeft: '5px', // 버튼 간격 추가
+    marginLeft: '5px',
   },
 };
 
