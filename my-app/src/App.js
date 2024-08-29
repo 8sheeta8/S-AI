@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import BrowserFS from 'browserfs';
 
 function App() {
   const [inputText, setInputText] = useState('');
@@ -6,10 +7,30 @@ function App() {
   const [typingIntervalId, setTypingIntervalId] = useState(null); // 타이핑 인터벌 ID 관리
   const [isTyping, setIsTyping] = useState(false); // GPT 출력 중 여부 관리
   const lastMessageRef = useRef(null);
-
+  const [fileContent, setFileContent] = useState('');
   const handleChange = (e) => {
     setInputText(e.target.value);
   };
+
+  useEffect(() => {
+    // 서버에 호스팅된 텍스트 파일의 URL을 여기에 넣습니다.
+    const fileUrl = '/prompt.txt';
+
+    // fetch 함수를 사용하여 파일을 가져옵니다.
+    fetch(fileUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('파일을 가져오는 데 실패했습니다.');
+        }
+        return response.text(); // 텍스트 형태로 응답을 변환합니다.
+      })
+      .then((text) => {
+        setFileContent(text); // 파일 내용을 상태에 저장합니다.
+      })
+      .catch((error) => {
+        console.error('파일을 읽는 도중 오류가 발생했습니다:', error);
+      });
+  }, []); // 빈 배열을 넣어 컴포넌트가 처음 렌더링될 때만 실행되도록 합니다.
 
   const handleResultClick = async () => {
     if (inputText.trim() !== '' && !isTyping) {
@@ -18,19 +39,22 @@ function App() {
       setMessages(updatedMessages);
       setInputText('');
       setIsTyping(true);
+      
+
+      
 
       try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ', // API Key 입력
+            'Authorization': 'Bearer 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', // API Key 입력
           },
           body: JSON.stringify({
             model: 'gpt-4',
             messages: updatedMessages.map((msg) => ({
               role: msg.type === 'user' ? 'user' : 'assistant', // 메시지의 타입에 따라 역할 지정
-              content: msg.text,
+              content: msg.text + fileContent,
             })),
           }),
         });
