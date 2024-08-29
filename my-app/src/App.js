@@ -90,6 +90,15 @@ function App() {
     }
   };
 
+    
+// 채팅 업데이트 시 자동으로 스크롤 최신 메시지로 이동 
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+
   return (
     <div style={styles.container}>
       <div style={styles.statusBar}>상단 상태바</div>
